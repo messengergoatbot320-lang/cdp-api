@@ -1,25 +1,35 @@
-const axios = require("axios");
+if (args[0] === "add") {
+  let boyUrl, girlUrl;
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_REPO = "messengergoatbot320-lang/cdp-api";
-const FILE_PATH = "data/couples.json";
+  const boyIndex = args.indexOf("boy");
+  const girlIndex = args.indexOf("girl");
 
-module.exports = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  try {
-    const getFile = await axios.get(
-      `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`,
-      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
-    );
-    const couples = JSON.parse(
-      Buffer.from(getFile.data.content, "base64").toString("utf8")
-    );
-    if (!couples || couples.length === 0) {
-      return res.status(404).json({ error: "No couples found" });
-    }
-    const random = couples[Math.floor(Math.random() * couples.length)];
-    return res.status(200).json(random);
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+  if (boyIndex !== -1 && girlIndex !== -1) {
+    boyUrl = args[boyIndex + 1].replace(/[\[\]]/g, "").trim();
+    girlUrl = args[girlIndex + 1].replace(/[\[\]]/g, "").trim();
+  } else {
+    boyUrl = args[1].replace(/[\[\]]/g, "").trim();
+    girlUrl = args[2].replace(/[\[\]]/g, "").trim();
   }
-};
+
+  if (!boyUrl || !girlUrl) {
+    return message.reply(
+      "⚠️ সঠিকভাবে দাও:\n.cdp add boy [link] girl [link]"
+    );
+  }
+
+  await message.reply("⏳ Adding couple DP, please wait...");
+
+  const addRes = await axios.post(`${baseURL}/api/add`, {
+    boyUrl,
+    girlUrl,
+    secret: "rocky_secret_2025"
+  });
+
+  return message.reply(
+    `✅ নতুন CDP add হয়েছে!\n\n` +
+    `👦 Boy: ${addRes.data.boy}\n` +
+    `👧 Girl: ${addRes.data.girl}\n` +
+    `🎀 Total CDP: ${addRes.data.total}`
+  );
+}
