@@ -1,6 +1,3 @@
-const axios = require("axios");
-
-// তোমার নিজের image list এখানে রাখো
 const couples = [
   {
     boy: "https://i.imgur.com/14uLcSi.jpeg",
@@ -14,16 +11,10 @@ const couples = [
     boy: "https://i.imgur.com/qXIn00k.jpeg",
     girl: "https://i.imgur.com/JJ2Imdp.jpeg"
   }
-  // আরো add করো
 ];
 
 module.exports = (req, res) => {
-  const { path } = req.query;
-
-  if (req.url.includes("/list")) {
-    return res.json({ total: couples.length });
-  }
-
+  res.setHeader("Access-Control-Allow-Origin", "*");
   const random = couples[Math.floor(Math.random() * couples.length)];
-  return res.json(random);
+  return res.status(200).json(random);
 };
