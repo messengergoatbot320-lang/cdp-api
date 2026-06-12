@@ -1,20 +1,25 @@
-const couples = [
-  {
-    boy: "https://i.imgur.com/14uLcSi.jpeg",
-    girl: "https://i.imgur.com/7eKVQqW.jpeg"
-  },
-  {
-    boy: "https://i.imgur.com/rg22DqL.jpeg",
-    girl: "https://i.imgur.com/dCRdzhr.jpeg"
-  },
-  {
-    boy: "https://i.imgur.com/qXIn00k.jpeg",
-    girl: "https://i.imgur.com/JJ2Imdp.jpeg"
-  }
-];
+const axios = require("axios");
 
-module.exports = (req, res) => {
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO = "messengergoatbot320-lang/cdp-api";
+const FILE_PATH = "data/couples.json";
+
+module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const random = couples[Math.floor(Math.random() * couples.length)];
-  return res.status(200).json(random);
+  try {
+    const getFile = await axios.get(
+      `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`,
+      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
+    );
+    const couples = JSON.parse(
+      Buffer.from(getFile.data.content, "base64").toString("utf8")
+    );
+    if (!couples || couples.length === 0) {
+      return res.status(404).json({ error: "No couples found" });
+    }
+    const random = couples[Math.floor(Math.random() * couples.length)];
+    return res.status(200).json(random);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 };
