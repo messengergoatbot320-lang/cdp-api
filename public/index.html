@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CDP API by Rocky</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 30px;
+    }
+
+    header .emoji { font-size: 64px; }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #f093fb, #f5576c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 10px 0 6px;
+    }
+
+    header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: #a8ff78;
+      margin-top: 10px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f093fb;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .endpoint-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .method {
+      background: linear-gradient(90deg, #f093fb, #f5576c);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      min-width: 42px;
+      text-align: center;
+    }
+
+    .url {
+      font-family: monospace;
+      font-size: 13px;
+      color: #a8ff78;
+      flex: 1;
+    }
+
+    .desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 5px;
+      padding-left: 52px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #f093fb, #f5576c);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      margin-top: 6px;
+    }
+
+    .btn:hover { opacity: 0.85; transform: scale(1.01); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-box {
+      margin-top: 16px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      padding: 16px;
+      display: none;
+    }
+
+    .images-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .img-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .img-wrap img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .img-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.6);
+      text-align: center;
+      font-size: 12px;
+      padding: 4px;
+    }
+
+    .link-row {
+      font-family: monospace;
+      font-size: 11px;
+      color: #f093fb;
+      word-break: break-all;
+      margin-top: 4px;
+    }
+
+    .link-row a { color: #f093fb; text-decoration: none; }
+    .link-row a:hover { text-decoration: underline; }
+
+    .total-box {
+      text-align: center;
+      padding: 16px;
+    }
+
+    .total-box .number {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #a8ff78, #78ffd6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .total-box .label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 20px;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    footer a {
+      color: #f093fb;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="emoji">🎀</div>
+    <h1>CDP API</h1>
+    <p>Couple DP API — Powered by Rocky</p>
+    <span class="badge">● Live</span>
+  </header>
+
+  <!-- Endpoints -->
+  <div class="card">
+    <h2>📡 Endpoints</h2>
+
+    <div class="endpoint-row">
+      <span class="method">GET</span>
+      <span class="url">/api/cdp</span>
+    </div>
+    <div class="desc">Random couple DP return করে (boy & girl)</div>
+
+    <div class="endpoint-row" style="margin-top:10px">
+      <span class="method">GET</span>
+      <span class="url">/api/list</span>
+    </div>
+    <div class="desc">মোট কতটা CDP আছে সেটা দেখায়</div>
+
+    <div class="endpoint-row" style="margin-top:10px">
+      <span class="method">POST</span>
+      <span class="url">/api/add</span>
+    </div>
+    <div class="desc">নতুন couple DP add করে (admin only)</div>
+  </div>
+
+  <!-- Live Test -->
+  <div class="card">
+    <h2>🎲 Live Test</h2>
+    <button class="btn" id="testBtn" onclick="testApi()">Random CDP দেখাও</button>
+
+    <div class="result-box" id="resultBox">
+      <div class="loader" id="loader">Loading...</div>
+      <div id="imgResult" style="display:none">
+        <div class="images-row">
+          <div class="img-wrap">
+            <img id="boyImg" src="" alt="Boy" />
+            <div class="img-label">👦 Boy</div>
+          </div>
+          <div class="img-wrap">
+            <img id="girlImg" src="" alt="Girl" />
+            <div class="img-label">👧 Girl</div>
+          </div>
+        </div>
+        <div class="link-row">👦 <a id="boyLink" href="" target="_blank">boy link</a></div>
+        <div class="link-row" style="margin-top:6px">👧 <a id="girlLink" href="" target="_blank">girl link</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Count -->
+  <div class="card">
+    <h2>📊 Total CDPs</h2>
+    <div class="total-box">
+      <div class="number" id="totalCount">...</div>
+      <div class="label">Couple DPs Available</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Rocky •
+    <a href="https://github.com/messengergoatbot320-lang/cdp-api" target="_blank">GitHub</a>
+    • cdp-api-ivory.vercel.app
+  </footer>
+
+</div>
+
+<script>
+  // Page load এ total count দেখাও
+  window.onload = async () => {
+    try {
+      const res = await fetch("/api/list");
+      const data = await res.json();
+      document.getElementById("totalCount").textContent = data.total;
+    } catch(e) {
+      document.getElementById("totalCount").textContent = "?";
+    }
+  };
+
+  async function testApi() {
+    const btn = document.getElementById("testBtn");
+    const resultBox = document.getElementById("resultBox");
+    const loader = document.getElementById("loader");
+    const imgResult = document.getElementById("imgResult");
+
+    btn.disabled = true;
+    btn.textContent = "Loading...";
+    resultBox.style.display = "block";
+    loader.style.display = "block";
+    imgResult.style.display = "none";
+
+    try {
+      const res = await fetch("/api/cdp");
+      const data = await res.json();
+
+      document.getElementById("boyImg").src = data.boy;
+      document.getElementById("girlImg").src = data.girl;
+      document.getElementById("boyLink").href = data.boy;
+      document.getElementById("boyLink").textContent = data.boy;
+      document.getElementById("girlLink").href = data.girl;
+      document.getElementById("girlLink").textContent = data.girl;
+
+      loader.style.display = "none";
+      imgResult.style.display = "block";
+
+    } catch(e) {
+      loader.textContent = "❌ Error: " + e.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = "🔄 আরেকটা দেখাও";
+  }
+</script>
+
+</body>
+</html>
