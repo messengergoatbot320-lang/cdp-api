@@ -1,33 +1,25 @@
-if (args[0] === "add") {
-  const fullText = args.slice(1).join(" ");
-  const urls = fullText.match(/https?:\/\/i\.imgur\.com\/[^\s\[\]<>\"]+/gi);
+const axios = require("axios");
 
-  if (!urls || urls.length < 2) {
-    return message.reply(
-      "⚠️ শুধু Imgur link দাও:\n.cdp add boy https://i.imgur.com/xxx.jpeg girl https://i.imgur.com/yyy.jpeg"
-    );
-  }
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO = "messengergoatbot320-lang/cdp-api";
+const FILE_PATH = "data/couples.json";
 
-  const boyUrl = urls[0].trim();
-  const girlUrl = urls[1].trim();
-
-  await message.reply("⏳ Adding couple DP, please wait...");
-
+module.exports = async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   try {
-    const addRes = await axios.post(`${baseURL}/api/add`, {
-      boyUrl,
-      girlUrl,
-      secret: "rocky_secret_2025"
-    });
-
-    return message.reply(
-      `✅ নতুন CDP add হয়েছে!\n\n` +
-      `👦 Boy: ${addRes.data.boy}\n` +
-      `👧 Girl: ${addRes.data.girl}\n` +
-      `🎀 Total CDP: ${addRes.data.total}`
+    const getFile = await axios.get(
+      `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`,
+      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
     );
-  } catch (err) {
-    const errMsg = err.response?.data?.error || err.message;
-    return message.reply(`❌ ${errMsg}`);
+    const couples = JSON.parse(
+      Buffer.from(getFile.data.content, "base64").toString("utf8")
+    );
+    if (!couples || couples.length === 0) {
+      return res.status(404).json({ error: "No couples found" });
+    }
+    const random = couples[Math.floor(Math.random() * couples.length)];
+    return res.status(200).json(random);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
-}
+};
